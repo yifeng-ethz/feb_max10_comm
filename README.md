@@ -2,7 +2,7 @@
 
 **Version**: 0.1.0
 **Author**: Yifeng Wang (yifenwan@phys.ethz.ch)
-**Date**: 2026-03-16
+**Date**: 2026-03-17
 **Device**: Intel Arria V (5AGXBA7D4F31C5)
 **Category**: Mu3e Control Plane / Modules
 
@@ -406,24 +406,28 @@ Presets can be loaded from:
 
 | Domain | Frequency | Period | WNS Margin Target |
 |:-------|:----------|:-------|:------------------|
-| `csr_clk` | 156.25 MHz | 6.400 ns | >= +0.640 ns (10%) |
-| `link_clk` | 50 MHz | 20.000 ns | >= +2.000 ns (10%) |
+| `csr_clk` | 156.25 MHz | 6.400 ns | >= +1.280 ns (20%) |
+| `link_clk` | 50 MHz | 20.000 ns | >= +4.000 ns (20%) |
 
-### 8.2 Standalone Timing (Arria V, slow 1100mV 85C)
+### 8.2 Standalone Timing (Arria V, current `syn/quartus` build)
 
-| Clock | WNS | TNS | Status |
-|:------|:----|:----|:-------|
-| `csr_clk` | -0.046 ns | -0.046 ns | Marginal (critical path: PAGE_DATA decode into `staged_words_count[0]`) |
-| `link_clk` | +12.510 ns | 0 | Clean |
+The current standalone build in `syn/quartus/output_files/` meets the 20%
+positive-slack requirement on both sign-off clocks.
 
-Hold timing is clean at all corners.
+| Clock | Worst Setup Corner | WNS | TNS | 20% Gate | Status |
+|:------|:-------------------|:----|:----|:---------|:-------|
+| `csr_clk` | Slow 1100mV 85C | +1.290 ns | 0.000 ns | >= +1.280 ns | Pass (+0.010 ns headroom) |
+| `link_clk` | Slow 1100mV 0C | +13.370 ns | 0.000 ns | >= +4.000 ns | Pass |
+
+Worst hold slack is +0.147 ns at the Fast 1100mV 0C corner on `link_clk`.
+Minimum pulse width is clean at all reported corners.
 
 ### 8.3 Resource Usage (Standalone)
 
 | Resource | Count |
 |:---------|:------|
-| ALMs | 2,123 |
-| Registers (FFs) | 3,931 |
+| ALMs | 1,585 |
+| Registers (FFs) | 3,775 |
 | RAM Blocks | 1 |
 | RAM Bits | 4,096 |
 | DSP Blocks | 0 |
@@ -480,13 +484,11 @@ synthesis default is `50000` (~1 ms at 50 MHz).
 
 ## 11. Known Issues and Open Items
 
-1. **Standalone CSR timing**: The `csr_clk` domain has a -0.046 ns WNS miss at the slow 85C corner on the PAGE_DATA write decode path. This does not affect board-level timing closure (which is dominated by other FEB clocks).
+1. **Gate-level simulation**: Not yet run. Should be added for formal sign-off.
 
-2. **Gate-level simulation**: Not yet run. Should be added for formal sign-off.
+2. **DV_PLAN.md**: Missing — should be created if formal verification traceability is required.
 
-3. **DV_PLAN.md**: Missing — should be created if formal verification traceability is required.
-
-4. **Boot history readback**: Deferred to Rev B. The current design covers programming-only.
+3. **Boot history readback**: Deferred to Rev B. The current design covers programming-only.
 
 ---
 
