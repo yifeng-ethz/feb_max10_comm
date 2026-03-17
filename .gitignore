@@ -1,0 +1,31 @@
+*.*~
+*.bak
+greybox_tmp/
+.qsys_edit/
+
+# Quartus standalone build outputs
+syn/quartus/db/
+syn/quartus/incremental_db/
+syn/quartus/output_files/
+syn/quartus/*.qws
+syn/quartus/*.qdf
+syn/quartus/cr_ie_info.json
+syn/quartus/a5_pin_model_dump.txt
+
+# Fast simulation outputs
+tb/sim/work_sim_*/
+tb/sim/transcript
+tb/sim/*.wlf
+tb/sim/*.vcd
+tb/sim/*.log
+
+# UVM simulation outputs
+tb/uvm/altera_mf/
+tb/uvm/modelsim.ini
+tb/uvm/transcript
+tb/uvm/work_uvm_feb_max10_comm/
+tb/uvm/regression_logs_*/
+tb/uvm/*.log
+tb/uvm/*.smoke.log
+tb/uvm/*.wlf
+tb/uvm/*.vcd

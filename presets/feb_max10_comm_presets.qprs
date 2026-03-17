@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ip><presets version="18.1">
+	<preset name="FEB Standard" kind="feb_max10_comm" version="0.1.0" description="Default FEB integration with sc_hub. Diagnostic conduit enabled for bring-up and SignalTap capture.">
+		<parameter name="CSR_ADDR_W" value="10" />
+		<parameter name="BURSTCOUNT_W" value="9" />
+		<parameter name="CDC_FIFO_ADDR_W" value="7" />
+		<parameter name="DEBUG_LEVEL" value="1" />
+		<parameter name="VERSION_MAJOR" value="0" />
+		<parameter name="VERSION_MINOR" value="1" />
+		<parameter name="VERSION_PATCH" value="0" />
+		<parameter name="BUILD" value="0" />
+		<parameter name="IP_ID" value="1295067216" />
+	</preset>
+	<preset name="Production Minimal" kind="feb_max10_comm" version="0.1.0" description="Reduced-footprint variant for production builds. Diagnostic conduit disabled, minimum CSR aperture, single-word bursts.">
+		<parameter name="CSR_ADDR_W" value="7" />
+		<parameter name="BURSTCOUNT_W" value="1" />
+		<parameter name="CDC_FIFO_ADDR_W" value="7" />
+		<parameter name="DEBUG_LEVEL" value="0" />
+		<parameter name="VERSION_MAJOR" value="0" />
+		<parameter name="VERSION_MINOR" value="1" />
+		<parameter name="VERSION_PATCH" value="0" />
+		<parameter name="BUILD" value="0" />
+		<parameter name="IP_ID" value="1295067216" />
+	</preset>
+</presets></ip>
