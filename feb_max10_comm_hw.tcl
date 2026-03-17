@@ -257,8 +257,8 @@ add_display_item $TAB_REGMAP "CSR Window" GROUP
 add_html_text "CSR Window" csr_table_html $CSR_TABLE_HTML
 
 # ─── Presets ─────────────────────────────────────────────────────────────────
-# Presets are provided via the external .qprs file:
-#   presets/feb_max10_comm_presets.qprs
+# Presets are provided via the sibling .qprs file:
+#   feb_max10_comm_presets.qprs
 #
 # Preset 1 — FEB Standard:
 #   CSR_ADDR_W=10, BURSTCOUNT_W=9, CDC_FIFO_ADDR_W=7, DEBUG_LEVEL=1

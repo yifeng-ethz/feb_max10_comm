@@ -101,11 +101,10 @@ feb_max10_comm/
 │   ├── feb_max10_comm_syn_top.vhd
 │   ├── feb_max10_comm_syn.sdc
 │   └── output_files/
-├── tb/
-│   ├── sim/                        8 deterministic SIM_* testcases
-│   └── uvm/                        128 randomized UVM_* testcases
-└── presets/
-    └── feb_max10_comm_presets.qprs  Platform Designer presets
+├── feb_max10_comm_presets.qprs     Platform Designer presets
+└── tb/
+    ├── sim/                        8 deterministic SIM_* testcases
+    └── uvm/                        128 randomized UVM_* testcases
 ```
 
 ### 3.2 Per-File Descriptions
@@ -395,7 +394,7 @@ Two presets are provided:
 | **Production Minimal** | Production builds with reduced resource usage. No diagnostic conduit. | `CSR_ADDR_W=7`, `BURSTCOUNT_W=1`, `DEBUG_LEVEL=0` (diagnostic conduit disabled) |
 
 Presets can be loaded from:
-- The **Presets** dropdown in Platform Designer (if the `.qprs` file is in the `presets/` folder)
+- The **Presets** dropdown in Platform Designer (Quartus/Platform Designer 18.1 discovers the `.qprs` file when it sits next to `_hw.tcl`)
 - Or applied manually using the parameter values above
 
 ---
