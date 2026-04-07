@@ -4,7 +4,7 @@ set -euo pipefail
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ip_dir="$(cd "${script_dir}/../.." && pwd)"
 common_tb_dir="${ip_dir}/tb/common"
-legacy_sim_dir="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/max10_prog_avmm/tb/sim"
+legacy_sim_dir="${ip_dir}/legacy/max10_prog_avmm/tb/sim"
 
 mentor_sim_bin_dir="/data1/intelFPGA_pro/23.1/questa_fse/bin"
 ase_sim_root="/data1/intelFPGA/18.1/modelsim_ase"

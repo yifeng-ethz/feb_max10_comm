@@ -13,7 +13,7 @@ work_name="$3"
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ip_dir="$(cd "${script_dir}/../.." && pwd)"
 common_tb_dir="${ip_dir}/tb/common"
-legacy_sim_dir="/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/max10_prog_avmm/tb/sim"
+legacy_sim_dir="${ip_dir}/legacy/max10_prog_avmm/tb/sim"
 work_dir="${TB_WORK_DIR:-${script_dir}/${work_name}}"
 
 tb_top="feb_max10_comm_case_tb"

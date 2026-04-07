@@ -4,7 +4,7 @@ This directory contains the deterministic post-RTL simulation layer for
 `feb_max10_comm`.
 
 The fast sim harness reuses the downstream compatibility models from
-`max10_prog_avmm/tb/sim/compat` and the shared
+`legacy/max10_prog_avmm/tb/sim/compat` and the shared
 `tb/common/feb_max10_comm_model_wrapper.vhd`. It is intended for quick checks
 after RTL edits and for verifying the packaged/Qsys-integrated source set.
 

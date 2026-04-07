@@ -15,6 +15,11 @@ programming bridge. It replaces the legacy `max10_prog_avmm` module with a
 clean, layered architecture while maintaining full protocol compatibility with
 the downstream MAX10 firmware contract (FEBSPI).
 
+The legacy `max10_prog_avmm` packaging tree is kept under
+`legacy/max10_prog_avmm/` so older Platform Designer systems can still resolve
+the historical component kind while the newer implementation remains the
+primary maintained IP.
+
 **What it does:**
 
 1. Accepts standard AVMM CSR transactions from the `sc_hub` controller
@@ -102,6 +107,8 @@ feb_max10_comm/
 │   ├── feb_max10_comm_syn.sdc
 │   └── output_files/
 ├── feb_max10_comm_presets.qprs     Platform Designer presets
+├── legacy/
+│   └── max10_prog_avmm/            Legacy 0.2.0 Platform Designer packaging
 └── tb/
     ├── sim/                        8 deterministic SIM_* testcases
     └── uvm/                        128 randomized UVM_* testcases
@@ -495,4 +502,4 @@ synthesis default is `50000` (~1 ms at 50 MHz).
 
 - `doc/RTL_PLAN.md` — Full RTL ownership specification and process descriptions
 - `doc/rtl_note.md` — Sign-off status, iteration history, integration evidence
-- `max10_prog_avmm/SPEC.md` — Legacy specification (protocol contract reference)
+- `legacy/max10_prog_avmm/SPEC.md` — Legacy specification and protocol contract reference

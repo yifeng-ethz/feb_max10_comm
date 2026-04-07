@@ -3,7 +3,7 @@
 - status   : implemented for current FEB programming stage
 - author   : Yifeng Wang (yifenwan@phys.ethz.ch)
 - created  : 2026-03-16
-- spec-ref : `max10_prog_avmm/SPEC.md`
+- spec-ref : `legacy/max10_prog_avmm/SPEC.md`
 - style-ref: `~/.codex/skills/rtl-writing/SKILL.md`
 
 ---
