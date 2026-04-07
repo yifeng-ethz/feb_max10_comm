@@ -3,7 +3,7 @@ package require -exact qsys 16.1
 set_module_property NAME max10_prog_avmm
 set_module_property DISPLAY_NAME "MAX10 Programming AVMM Bridge"
 set_module_property VERSION 0.2.0
-set_module_property DESCRIPTION "Arria-side AVMM CSR bridge for FEB to MAX10 flash programming. Stages one 256-byte page, crosses into the MAX10 link domain through a dual-clock FIFO, and preserves the existing downstream FEBSPI programming contract."
+set_module_property DESCRIPTION "Arria-side AVMM CSR bridge for MAX10 flash programming. Stages one 256-byte page, supports sequential CSR read bursts, crosses into the MAX10 link domain through a dual-clock FIFO, and preserves the existing downstream FEBSPI programming contract."
 set_module_property GROUP "Mu3e Control Plane/Modules"
 set_module_property AUTHOR "Yifeng Wang"
 set_module_property INTERNAL false
@@ -142,7 +142,7 @@ set_parameter_property CSR_ADDR_W ALLOWED_RANGES 7:32
 set_parameter_property CSR_ADDR_W HDL_PARAMETER true
 set_parameter_property CSR_ADDR_W DESCRIPTION "AVMM CSR address width in words. Must cover the PAGE_DATA aperture through word 0x5F."
 
-add_parameter BURSTCOUNT_W NATURAL 1
+add_parameter BURSTCOUNT_W NATURAL 9
 set_parameter_property BURSTCOUNT_W DISPLAY_NAME "Burstcount Width"
 set_parameter_property BURSTCOUNT_W UNITS Bits
 set_parameter_property BURSTCOUNT_W ALLOWED_RANGES 1:16
@@ -156,12 +156,12 @@ set_parameter_property CDC_FIFO_ADDR_W ALLOWED_RANGES 7:10
 set_parameter_property CDC_FIFO_ADDR_W HDL_PARAMETER true
 set_parameter_property CDC_FIFO_ADDR_W DESCRIPTION "Dual-clock FIFO depth is 2^CDC_FIFO_ADDR_W entries. One entry is reserved for the launch header; 64 payload words are required for a full page."
 
-add_parameter BOOT_HIST_AUTO_REFRESH NATURAL 1
-set_parameter_property BOOT_HIST_AUTO_REFRESH DISPLAY_NAME "Boot History Auto Refresh"
+add_parameter BOOT_HIST_AUTO_REFRESH NATURAL 0
+set_parameter_property BOOT_HIST_AUTO_REFRESH DISPLAY_NAME "Auto-Refresh Boot History"
 set_parameter_property BOOT_HIST_AUTO_REFRESH ALLOWED_RANGES 0:1
 set_parameter_property BOOT_HIST_AUTO_REFRESH HDL_PARAMETER true
 
-add_parameter DEBUG_LEVEL NATURAL 0
+add_parameter DEBUG_LEVEL NATURAL 1
 set_parameter_property DEBUG_LEVEL DISPLAY_NAME "Debug Level"
 set_parameter_property DEBUG_LEVEL UNITS None
 set_parameter_property DEBUG_LEVEL ALLOWED_RANGES 0:4
@@ -181,7 +181,7 @@ set_parameter_property VERSION_MAJOR UNITS None
 set_parameter_property VERSION_MAJOR ALLOWED_RANGES 0:255
 set_parameter_property VERSION_MAJOR HDL_PARAMETER true
 
-add_parameter VERSION_MINOR NATURAL 2
+add_parameter VERSION_MINOR NATURAL 1
 set_parameter_property VERSION_MINOR DISPLAY_NAME "Version Minor"
 set_parameter_property VERSION_MINOR UNITS None
 set_parameter_property VERSION_MINOR ALLOWED_RANGES 0:255
