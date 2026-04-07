@@ -61,10 +61,12 @@ def main() -> int:
     fe_scifi_dir = online_root / "fe_board" / "fe_scifi"
     qsys_gen = online_root / "common" / "firmware" / "util" / "quartus" / "qsys-generate.sh"
     qsys_update = fe_scifi_dir / "update_feb_max10_comm_qsys.tcl"
+    quartus_system_dir = (ip_root.parent / "quartus_system").resolve()
     qsys_search_path = ",".join(
         [
             str((online_root / "fe_board" / "ip_mu3e").resolve()),
             str(ip_root.resolve()),
+            str(quartus_system_dir),
             str(ip_root.parent.resolve()),
             str(fe_scifi_dir.resolve()),
             "$",
@@ -82,16 +84,15 @@ def main() -> int:
     ip_sdc = ip_root / "feb_max10_comm.sdc"
     hw_tcl = ip_root / "feb_max10_comm_hw.tcl"
     controller_vhd = ip_root / "rtl" / "max10_controller.vhd"
-    catalog_ipx = ip_root.parent / "components.ipx"
+    catalog_ipx = quartus_system_dir / "components.ipx"
 
     errors: list[str] = []
 
     if not args.skip_regenerate:
         rc, out = run_cmd(
             [
-                "ip-make-ipx",
-                f"--source-directory={ip_root.parent}",
-                f"--output={catalog_ipx}",
+                "bash",
+                str(ip_root.parent / "quartus_system" / "regenerate_ipx_catalog.sh"),
             ],
             ip_root.parent,
         )
