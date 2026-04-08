@@ -264,7 +264,10 @@ architecture rtl of max10_prog_avmm is
     constant CDC_HEADER_XFER_MSB_CONST        : natural                := 32;
     constant CDC_HEADER_XFER_LSB_CONST        : natural                := 24;
     constant IP_ID_CONST                      : word_t                 := std_logic_vector(to_unsigned(IP_ID, 32)); -- "M10P"
-    constant BOOT_HIST_AUTO_REFRESH_CONST     : std_logic              := bool_to_std_logic_func(BOOT_HIST_AUTO_REFRESH /= 0);
+    -- Background boot-history refresh is only useful when the debug-facing
+    -- registers are actually exposed. Keeping it disabled for DEBUG_LEVEL=0
+    -- avoids live status churn in the production sc_hub CSR aperture.
+    constant BOOT_HIST_AUTO_REFRESH_CONST     : std_logic              := bool_to_std_logic_func((BOOT_HIST_AUTO_REFRESH /= 0) and (DEBUG_LEVEL /= 0));
     constant XFER_BYTES_RESET_CONST           : unsigned(8 downto 0)   := to_unsigned(256, 9);
     constant ZERO_WORD_CONST                  : word_t                 := (others => '0');
     constant PAGE_MEM_RESET_CONST             : page_mem_array         := (others => (others => '0'));
