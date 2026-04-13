@@ -1,0 +1,1613 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<device schemaVersion="1.3" xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" xs:noNamespaceSchemaLocation="CMSIS-SVD.xsd">
+  <vendor>Mu3e</vendor>
+  <vendorID>MU3E</vendorID>
+  <name>MU3E_MAX10_PROG_AVMM</name>
+  <series>MU3E_FPGA_IP</series>
+  <version>0.2.0</version>
+  <description>CMSIS-SVD description of the max10_prog_avmm control aperture. BaseAddress is 0 because this file describes the relative CSR aperture of the IP; system integration supplies the live slave base address.</description>
+  <addressUnitBits>8</addressUnitBits>
+  <width>32</width>
+  <size>32</size>
+  <access>read-write</access>
+  <resetValue>0x00000000</resetValue>
+  <resetMask>0xFFFFFFFF</resetMask>
+  <peripherals>
+    <peripheral>
+      <name>MAX10_PROG_AVMM_CSR</name>
+      <description>Relative CSR aperture for standard-AVMM MAX10 page programming. The sparse gaps between LAST_ERROR and PAGE_DATA are reserved.</description>
+      <groupName>MU3E_MAX10_PROG</groupName>
+      <baseAddress>0x0</baseAddress>
+      <addressBlock>
+        <offset>0x0</offset>
+        <size>0x1000</size>
+        <usage>registers</usage>
+      </addressBlock>
+      <registers>
+        <register>
+          <name>ID</name>
+          <description>IP identifier magic. Default Rev-A value is ASCII &quot;M10P&quot;.</description>
+          <addressOffset>0x000</addressOffset>
+          <access>read-only</access>
+          <resetValue>0x4D313050</resetValue>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Packed ASCII identifier.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>VERSION</name>
+          <description>Packed interface version: [31:24]=major, [23:16]=minor, [15:12]=patch, [11:0]=build.</description>
+          <addressOffset>0x004</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field>
+              <name>major</name>
+              <description>Major version.</description>
+              <bitOffset>24</bitOffset>
+              <bitWidth>8</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>minor</name>
+              <description>Minor version.</description>
+              <bitOffset>16</bitOffset>
+              <bitWidth>8</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>patch</name>
+              <description>Patch version.</description>
+              <bitOffset>12</bitOffset>
+              <bitWidth>4</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>build</name>
+              <description>Build provenance; not part of the software ABI.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>12</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>CTRL</name>
+          <description>Common management control.</description>
+          <addressOffset>0x008</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>sw_reset</name>
+              <description>Soft reset pulse.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+              <modifiedWriteValues>oneToSet</modifiedWriteValues>
+            </field>
+            <field>
+              <name>reserved</name>
+              <description>Reserved, write zero.</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>31</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>STATUS</name>
+          <description>Common ready/busy/fault/resetting summary.</description>
+          <addressOffset>0x00C</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field>
+              <name>ready</name>
+              <description>IP is CSR-accessible and not held in software reset.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>busy</name>
+              <description>At least one local programming operation is in flight.</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>fault</name>
+              <description>Sticky summary: ERR_FLAGS != 0.</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>resetting</name>
+              <description>Software reset is in progress.</description>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>reserved</name>
+              <description>Reserved, read as zero.</description>
+              <bitOffset>4</bitOffset>
+              <bitWidth>28</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>ERR_FLAGS</name>
+          <description>Sticky local error flags.</description>
+          <addressOffset>0x010</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>start_while_busy</name>
+              <description>START requested while busy.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+              <modifiedWriteValues>oneToClear</modifiedWriteValues>
+            </field>
+            <field>
+              <name>start_during_reset</name>
+              <description>START requested during software reset.</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+              <modifiedWriteValues>oneToClear</modifiedWriteValues>
+            </field>
+            <field>
+              <name>addr_missing</name>
+              <description>START requested before FLASH_ADDR was valid.</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+              <modifiedWriteValues>oneToClear</modifiedWriteValues>
+            </field>
+            <field>
+              <name>xfer_bytes_zero</name>
+              <description>XFER_BYTES was zero at START time.</description>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+              <modifiedWriteValues>oneToClear</modifiedWriteValues>
+            </field>
+            <field>
+              <name>xfer_bytes_gt_256</name>
+              <description>XFER_BYTES exceeded 256 at START time.</description>
+              <bitOffset>4</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+              <modifiedWriteValues>oneToClear</modifiedWriteValues>
+            </field>
+            <field>
+              <name>page_underrun</name>
+              <description>Not enough contiguous page data was staged.</description>
+              <bitOffset>5</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+              <modifiedWriteValues>oneToClear</modifiedWriteValues>
+            </field>
+            <field>
+              <name>link_timeout</name>
+              <description>Downstream Arria/MAX10 link timed out.</description>
+              <bitOffset>6</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+              <modifiedWriteValues>oneToClear</modifiedWriteValues>
+            </field>
+            <field>
+              <name>max10_timeout</name>
+              <description>MAX10 reported timeout.</description>
+              <bitOffset>7</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+              <modifiedWriteValues>oneToClear</modifiedWriteValues>
+            </field>
+            <field>
+              <name>max10_crcerror</name>
+              <description>MAX10 reported CRC error.</description>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+              <modifiedWriteValues>oneToClear</modifiedWriteValues>
+            </field>
+            <field>
+              <name>max10_nstatus_low</name>
+              <description>MAX10 reported NSTATUS low.</description>
+              <bitOffset>9</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-write</access>
+              <modifiedWriteValues>oneToClear</modifiedWriteValues>
+            </field>
+            <field>
+              <name>reserved</name>
+              <description>Reserved, read as zero.</description>
+              <bitOffset>10</bitOffset>
+              <bitWidth>22</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>ERR_COUNT</name>
+          <description>Saturating count of newly-detected error events.</description>
+          <addressOffset>0x014</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Error event count.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>SCRATCH</name>
+          <description>Diagnostic scratch register with no side effects.</description>
+          <addressOffset>0x018</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Scratch value.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>FLASH_ADDR</name>
+          <description>Absolute SPI flash byte address for the next page launch.</description>
+          <addressOffset>0x01C</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>flash_addr</name>
+              <description>Absolute flash byte address.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>24</bitWidth>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>reserved</name>
+              <description>Reserved, write zero.</description>
+              <bitOffset>24</bitOffset>
+              <bitWidth>8</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>XFER_BYTES</name>
+          <description>Number of valid payload bytes for the next START request. Reset default is 256.</description>
+          <addressOffset>0x020</addressOffset>
+          <access>read-write</access>
+          <resetValue>0x00000100</resetValue>
+          <fields>
+            <field>
+              <name>xfer_bytes</name>
+              <description>Valid payload byte count, legal range 1..256.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>9</bitWidth>
+              <access>read-write</access>
+            </field>
+            <field>
+              <name>reserved</name>
+              <description>Reserved, write zero.</description>
+              <bitOffset>9</bitOffset>
+              <bitWidth>23</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PROG_CTRL</name>
+          <description>Write-one pulse programming commands. Reads are not meaningful and should be avoided.</description>
+          <addressOffset>0x024</addressOffset>
+          <access>write-only</access>
+          <fields>
+            <field>
+              <name>start</name>
+              <description>Launch one programming transaction.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>write-only</access>
+            </field>
+            <field>
+              <name>clear_page</name>
+              <description>Clear the page aperture and staged-word count.</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>write-only</access>
+            </field>
+            <field>
+              <name>clear_status</name>
+              <description>Clear LAST_ERROR and sticky programming status.</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>write-only</access>
+            </field>
+            <field>
+              <name>clear_addr</name>
+              <description>Clear the local address-valid latch and zero FLASH_ADDR.</description>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>write-only</access>
+            </field>
+            <field>
+              <name>reserved</name>
+              <description>Reserved, write zero.</description>
+              <bitOffset>4</bitOffset>
+              <bitWidth>28</bitWidth>
+              <access>write-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PROG_STATUS</name>
+          <description>Programming engine status and mirrored MAX10 status summary.</description>
+          <addressOffset>0x028</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field>
+              <name>ready</name>
+              <description>Local engine is idle and launch-eligible.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>busy</name>
+              <description>Programming launch is in progress.</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>page_ready</name>
+              <description>Enough contiguous page data is staged for the current XFER_BYTES.</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>addr_valid</name>
+              <description>FLASH_ADDR has been written since reset or clear.</description>
+              <bitOffset>3</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>len_valid</name>
+              <description>XFER_BYTES is in the legal range 1..256.</description>
+              <bitOffset>4</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>cdc_busy</name>
+              <description>Metadata or payload handoff across domains is in progress.</description>
+              <bitOffset>5</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>launch_accepted</name>
+              <description>Sticky until clear_status; most recent START was accepted.</description>
+              <bitOffset>6</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>launch_done</name>
+              <description>Sticky until clear_status; most recent accepted START finished.</description>
+              <bitOffset>7</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>max10_arriawriting</name>
+              <description>Raw mirror of MAX10 PROGRAMMING_STATUS[0].</description>
+              <bitOffset>8</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>max10_spi_busy</name>
+              <description>Raw mirror of MAX10 PROGRAMMING_STATUS[1].</description>
+              <bitOffset>9</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>max10_fifo_empty</name>
+              <description>Raw mirror of MAX10 PROGRAMMING_STATUS[14].</description>
+              <bitOffset>10</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>max10_fifo_full</name>
+              <description>Raw mirror of MAX10 PROGRAMMING_STATUS[15].</description>
+              <bitOffset>11</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>max10_conf_done</name>
+              <description>Raw mirror of MAX10 PROGRAMMING_STATUS[16].</description>
+              <bitOffset>12</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>max10_nstatus</name>
+              <description>Raw mirror of MAX10 PROGRAMMING_STATUS[17].</description>
+              <bitOffset>13</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>max10_timeout</name>
+              <description>Raw mirror of MAX10 PROGRAMMING_STATUS[18].</description>
+              <bitOffset>14</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>max10_crcerror</name>
+              <description>Raw mirror of MAX10 PROGRAMMING_STATUS[19].</description>
+              <bitOffset>15</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>engine_state</name>
+              <description>Implementation-defined local debug state.</description>
+              <bitOffset>16</bitOffset>
+              <bitWidth>8</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>reserved</name>
+              <description>Reserved, read as zero.</description>
+              <bitOffset>24</bitOffset>
+              <bitWidth>8</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>STAGED_WORDS</name>
+          <description>Number of contiguous valid words staged from PAGE_DATA[0].</description>
+          <addressOffset>0x02C</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Count of contiguous valid words.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>7</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>reserved</name>
+              <description>Reserved, read as zero.</description>
+              <bitOffset>7</bitOffset>
+              <bitWidth>25</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>MAX10_STAT</name>
+          <description>Raw mirror of MAX10 PROGRAMMING_STATUS.</description>
+          <addressOffset>0x030</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field>
+              <name>arria_writing</name>
+              <description>Arria writing in progress.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>spi_busy</name>
+              <description>SPI flash engine busy.</description>
+              <bitOffset>1</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>reserved0</name>
+              <description>Reserved or implementation-defined.</description>
+              <bitOffset>2</bitOffset>
+              <bitWidth>12</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>fifo_empty</name>
+              <description>Programming FIFO empty.</description>
+              <bitOffset>14</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>fifo_full</name>
+              <description>Programming FIFO full.</description>
+              <bitOffset>15</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>conf_done</name>
+              <description>CONF_DONE state.</description>
+              <bitOffset>16</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>nstatus</name>
+              <description>NSTATUS state.</description>
+              <bitOffset>17</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>timeout</name>
+              <description>Timeout sticky flag.</description>
+              <bitOffset>18</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>crcerror</name>
+              <description>CRC error sticky flag.</description>
+              <bitOffset>19</bitOffset>
+              <bitWidth>1</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>reserved1</name>
+              <description>Reserved or implementation-defined.</description>
+              <bitOffset>20</bitOffset>
+              <bitWidth>4</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>max10_debug</name>
+              <description>MAX10 FPP debug byte.</description>
+              <bitOffset>24</bitOffset>
+              <bitWidth>8</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>MAX10_COUNT</name>
+          <description>Raw mirror of MAX10 PROGRAMMING_COUNT. Debug only.</description>
+          <addressOffset>0x034</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw MAX10 count/debug word.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>LAST_ERROR</name>
+          <description>Last error code and debug snapshot.</description>
+          <addressOffset>0x038</addressOffset>
+          <access>read-only</access>
+          <fields>
+            <field>
+              <name>error_code</name>
+              <description>Last error code.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>8</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>engine_state</name>
+              <description>Local engine state captured at failure.</description>
+              <bitOffset>8</bitOffset>
+              <bitWidth>8</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>staged_words</name>
+              <description>Staged word count captured at failure.</description>
+              <bitOffset>16</bitOffset>
+              <bitWidth>8</bitWidth>
+              <access>read-only</access>
+            </field>
+            <field>
+              <name>max10_debug</name>
+              <description>MAX10 debug byte captured at failure.</description>
+              <bitOffset>24</bitOffset>
+              <bitWidth>8</bitWidth>
+              <access>read-only</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_00</name>
+          <description>Page staging word 0. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x080</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 0.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_01</name>
+          <description>Page staging word 1. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x084</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 1.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_02</name>
+          <description>Page staging word 2. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x088</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 2.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_03</name>
+          <description>Page staging word 3. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x08C</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 3.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_04</name>
+          <description>Page staging word 4. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x090</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 4.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_05</name>
+          <description>Page staging word 5. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x094</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 5.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_06</name>
+          <description>Page staging word 6. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x098</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 6.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_07</name>
+          <description>Page staging word 7. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x09C</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 7.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_08</name>
+          <description>Page staging word 8. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0A0</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 8.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_09</name>
+          <description>Page staging word 9. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0A4</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 9.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_10</name>
+          <description>Page staging word 10. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0A8</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 10.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_11</name>
+          <description>Page staging word 11. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0AC</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 11.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_12</name>
+          <description>Page staging word 12. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0B0</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 12.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_13</name>
+          <description>Page staging word 13. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0B4</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 13.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_14</name>
+          <description>Page staging word 14. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0B8</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 14.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_15</name>
+          <description>Page staging word 15. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0BC</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 15.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_16</name>
+          <description>Page staging word 16. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0C0</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 16.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_17</name>
+          <description>Page staging word 17. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0C4</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 17.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_18</name>
+          <description>Page staging word 18. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0C8</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 18.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_19</name>
+          <description>Page staging word 19. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0CC</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 19.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_20</name>
+          <description>Page staging word 20. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0D0</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 20.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_21</name>
+          <description>Page staging word 21. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0D4</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 21.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_22</name>
+          <description>Page staging word 22. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0D8</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 22.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_23</name>
+          <description>Page staging word 23. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0DC</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 23.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_24</name>
+          <description>Page staging word 24. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0E0</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 24.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_25</name>
+          <description>Page staging word 25. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0E4</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 25.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_26</name>
+          <description>Page staging word 26. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0E8</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 26.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_27</name>
+          <description>Page staging word 27. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0EC</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 27.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_28</name>
+          <description>Page staging word 28. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0F0</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 28.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_29</name>
+          <description>Page staging word 29. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0F4</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 29.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_30</name>
+          <description>Page staging word 30. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0F8</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 30.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_31</name>
+          <description>Page staging word 31. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x0FC</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 31.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_32</name>
+          <description>Page staging word 32. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x100</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 32.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_33</name>
+          <description>Page staging word 33. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x104</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 33.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_34</name>
+          <description>Page staging word 34. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x108</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 34.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_35</name>
+          <description>Page staging word 35. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x10C</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 35.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_36</name>
+          <description>Page staging word 36. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x110</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 36.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_37</name>
+          <description>Page staging word 37. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x114</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 37.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_38</name>
+          <description>Page staging word 38. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x118</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 38.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_39</name>
+          <description>Page staging word 39. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x11C</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 39.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_40</name>
+          <description>Page staging word 40. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x120</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 40.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_41</name>
+          <description>Page staging word 41. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x124</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 41.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_42</name>
+          <description>Page staging word 42. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x128</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 42.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_43</name>
+          <description>Page staging word 43. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x12C</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 43.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_44</name>
+          <description>Page staging word 44. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x130</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 44.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_45</name>
+          <description>Page staging word 45. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x134</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 45.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_46</name>
+          <description>Page staging word 46. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x138</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 46.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_47</name>
+          <description>Page staging word 47. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x13C</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 47.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_48</name>
+          <description>Page staging word 48. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x140</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 48.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_49</name>
+          <description>Page staging word 49. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x144</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 49.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_50</name>
+          <description>Page staging word 50. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x148</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 50.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_51</name>
+          <description>Page staging word 51. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x14C</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 51.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_52</name>
+          <description>Page staging word 52. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x150</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 52.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_53</name>
+          <description>Page staging word 53. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x154</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 53.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_54</name>
+          <description>Page staging word 54. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x158</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 54.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_55</name>
+          <description>Page staging word 55. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x15C</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 55.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_56</name>
+          <description>Page staging word 56. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x160</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 56.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_57</name>
+          <description>Page staging word 57. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x164</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 57.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_58</name>
+          <description>Page staging word 58. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x168</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 58.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_59</name>
+          <description>Page staging word 59. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x16C</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 59.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_60</name>
+          <description>Page staging word 60. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x170</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 60.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_61</name>
+          <description>Page staging word 61. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x174</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 61.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_62</name>
+          <description>Page staging word 62. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x178</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 62.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+        <register>
+          <name>PAGE_DATA_63</name>
+          <description>Page staging word 63. Byte lane mapping is little-endian: [7:0]=byte 4n+0 through [31:24]=byte 4n+3.</description>
+          <addressOffset>0x17C</addressOffset>
+          <access>read-write</access>
+          <fields>
+            <field>
+              <name>value</name>
+              <description>Raw staged page word 63.</description>
+              <bitOffset>0</bitOffset>
+              <bitWidth>32</bitWidth>
+              <access>read-write</access>
+            </field>
+          </fields>
+        </register>
+      </registers>
+    </peripheral>
+  </peripherals>
+</device>
