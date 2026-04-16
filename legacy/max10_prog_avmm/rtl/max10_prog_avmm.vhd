@@ -1,8 +1,25 @@
 -- File name : max10_prog_avmm.vhd
 -- Author    : Yifeng Wang (yifenwan@phys.ethz.ch)
 -- =======================================
--- Revision  : 0.2.0 (registered CSR read response for PD-agent compatibility)
--- Date      : 20260402
+-- Revision  : 26.2.1 (pipeline launch_page_data bulk copy via launch_copy_pending one-shot)
+-- Date      : 20260416
+-- Change    : The launch_page_data <= page_data bulk copy previously fired
+--             combinationally the same cycle as the validated START command.
+--             Quartus built the 65x32 register file's |sload enable from the
+--             full START-decode cone (address + START bit + state +
+--             xfer_bytes + page_ready + page_valid checks), pulling a 6-LUT
+--             path from the AVMM pipeline stage data1[46] into
+--             launch_page_data[*][*]|sload and failing round-8 Slow-85C setup
+--             at -0.256. The fix arms a single-flop one-shot
+--             (launch_copy_pending) when START validates, and performs the
+--             bulk copy one cycle later. The |sload enable collapses to a
+--             one-flop compare. Queue handshake timing is preserved: the
+--             first FIFO push is the header (uses launch_flash_addr /
+--             launch_xfer_bytes, not launch_page_data), so the +1-cycle
+--             launch_page_data latch still lands before the first data word
+--             push at queue_word_index = 0.
+-- Revision  : 26.2.0 (registered csr_staged_words to break prefix_count_func cone at Slow-85C)
+-- Date      : 20260415
 -- =========
 -- Description : [Arria-side AVMM-to-MAX10 programming bridge]
 --
@@ -579,18 +596,42 @@ architecture rtl of max10_prog_avmm is
     signal link                        : link_reg_t               := LINK_RESET_CONST; -- Downstream Arria-to-MAX10 FEBSPI link-domain state owner.
     signal csr_pack                    : csr_pack_reg_t           := CSR_PACK_RESET_CONST; -- Large CSR-domain page-storage pack kept outside csr.
 
-    signal csr_staged_words            : natural range 0 to 64;
+    signal csr_staged_words_comb       : natural range 0 to 64;                     -- Combinational output of prefix_count_func(page_valid); feeds the csr_staged_words flop.
+    signal csr_staged_words            : natural range 0 to 64                 := 0; -- Registered copy of csr_staged_words_comb; breaks the prefix_count_func combinational cone from page_valid to csr_page_ready_r / csr_bank_ctrl_r at Slow-85C setup.
     signal csr_required_words          : natural range 0 to 64;
     signal csr_len_valid               : std_logic;
     signal csr_page_ready              : std_logic;
     signal csr_page_ready_r            : std_logic                  := '0'; -- Registered copy of csr_page_ready; breaks the prefix_count_func combinational path from page_valid to launch_toggle.
+    -- One-shot pulse armed when a validated START command is accepted.
+    -- Drives the launch_page_data bulk copy one cycle later so the
+    -- launch_page_data[*]|sload enable is a single-flop compare instead of a
+    -- 6-LUT cone that decodes address + START bit + state + xfer_bytes + page_ready
+    -- combinationally. Fixes round-8 path-15 (data1[46] -> launch_page_data[*]|sload
+    -- -0.256 at Slow 85C).
+    signal launch_copy_pending         : std_logic                  := '0';
     signal csr_ready                   : std_logic;
     signal csr_fault                   : std_logic;
     signal csr_state_slv               : std_logic_vector(7 downto 0);
-    signal csr_readdata_comb           : word_t;
+    -- Per-bank pipelined CSR readback cone (Slow-85C setup closure).
+    --
+    -- The readback mux is split into three narrow bank decoders whose outputs
+    -- are flopped, and stage 2 is a shallow 3-way OR of the flopped bank words.
+    -- This removes csr_read_addr_reg[*] from the direct arrival path to
+    -- csr_read_data[*]: the worst remaining stage-1.5 bank decode is the 64-way
+    -- indexed page_data mux, and stage 2 is a 1-LUT OR-reduce. AVMM read
+    -- latency increases from 2 to 3 cycles — sc_hub uses waitrequest so the
+    -- additional cycle is transparent to masters. Burst drain throughput is
+    -- unchanged (one valid per cycle in steady state).
+    signal csr_bank_ctrl_comb          : word_t;                    -- Bank 0 (0x000..0x00E) combinational decode.
+    signal csr_bank_page_comb          : word_t;                    -- Bank 1 (0x020..0x05F) combinational page_data mux.
+    signal csr_bank_boot_comb          : word_t;                    -- Bank 2 (0x060..0x074) combinational boot-history mux.
+    signal csr_bank_ctrl_r           : word_t                     := (others => '0'); -- Stage 1.5 flop for bank 0.
+    signal csr_bank_page_r           : word_t                     := (others => '0'); -- Stage 1.5 flop for bank 1.
+    signal csr_bank_boot_r           : word_t                     := (others => '0'); -- Stage 1.5 flop for bank 2.
+    signal csr_read_respond_r         : std_logic                  := '0'; -- 1-cycle delayed respond; gates csr_read_valid at stage 2.
     signal csr_done_toggle_det         : std_logic                  := '0'; -- Registered done-toggle detect; breaks the combo path from done_toggle_sync[1,2] through the variable-based state machine.
     signal csr_read_addr_reg           : std_logic_vector(CSR_ADDR_W-1 downto 0) := (others => '0'); -- Registered read address; breaks the combo path from csr_read_burst_active through the case decode.
-    signal csr_read_respond            : std_logic                  := '0'; -- 1-cycle delayed flag: decode csr_read_addr_reg and output data this cycle.
+    signal csr_read_respond            : std_logic                  := '0'; -- Stage 1 arm flag: bank decoders drive stage-1.5 flops this cycle.
     signal csr_read_data               : word_t                     := (others => '0');
     signal csr_read_valid              : std_logic                  := '0';
     signal csr_read_burst_active       : std_logic                  := '0';
@@ -619,7 +660,7 @@ begin
         report "CDC_FIFO_ADDR_W must provide at least 128 entries for one header plus 64 payload words"
         severity failure;
 
-    csr_staged_words            <= prefix_count_func(csr_pack.page_valid);
+    csr_staged_words_comb       <= prefix_count_func(csr_pack.page_valid);
     csr_required_words          <= required_words_func(csr.xfer_bytes);
     csr_len_valid               <= '1' when (to_integer(csr.xfer_bytes) >= 1 and to_integer(csr.xfer_bytes) <= 256) else '0';
     csr_page_ready              <= '1' when ((csr_len_valid = '1') and (csr_staged_words >= csr_required_words)) else '0';
@@ -1102,8 +1143,6 @@ begin
             csr_pack              <= CSR_PACK_RESET_CONST;
             cdc_fifo_wrreq        <= '0';
             csr_fifo_clear        <= '0';
-            csr_read_data         <= (others => '0');
-            csr_read_valid        <= '0';
             csr_done_toggle_det   <= '0';
             csr_read_respond      <= '0';
             csr_read_addr_reg     <= (others => '0');
@@ -1112,7 +1151,10 @@ begin
             csr_read_burst_remaining
                                   <= 0;
             csr_page_ready_r      <= '0';
+            csr_staged_words      <= 0;
+            launch_copy_pending   <= '0';
         elsif rising_edge(csi_csr_clk) then
+            csr_staged_words         <= csr_staged_words_comb;
             csr_page_ready_r         <= csr_page_ready;
             csr_done_toggle_det      <= csr.done_toggle_sync(2) xor csr.done_toggle_sync(1); -- Pre-register the toggle detect; used one cycle later to break combo path from sync chain through state machine.
             csr_v                    := csr;
@@ -1121,19 +1163,22 @@ begin
                                      := csr.boot_done_toggle_sync(1 downto 0) & link.boot_done_toggle;
             cdc_fifo_wrreq           <= '0';
             csr_fifo_clear           <= '0';
-            csr_read_valid           <= '0';
             csr_read_respond         <= '0'; -- default: no decode this cycle
+            launch_copy_pending      <= '0'; -- one-shot: will be re-armed below if a validated START arrives
 
-            -- Stage 2: one cycle after the address was registered,
-            -- the combinational decode (csr_readdata_comb) is stable — capture it.
-            if csr_read_respond = '1' then
-                csr_read_data        <= csr_readdata_comb;
-                csr_read_valid       <= '1';
+            -- One cycle after a START command is validated, perform the bulk
+            -- launch_page_data <= page_data copy. This turns the launch_page_data
+            -- |sload enable into a single-flop compare (launch_copy_pending) instead
+            -- of a 6-LUT cone on address + state + xfer_bytes + page_ready decode.
+            if launch_copy_pending = '1' then
+                csr_pack.launch_page_data <= csr_pack.page_data;
             end if;
 
-            -- Stage 1: register the read address and arm the respond flag
-            -- for the next cycle. Burst continuation takes priority since
-            -- waitrequest blocks new requests while burst is active.
+            -- Stage 1: register the read address and arm the respond flag for
+            -- the next cycle. The bank decode + stage-1.5 flops live in the
+            -- dedicated csr_rd_pipe process below. Burst continuation takes
+            -- priority since waitrequest blocks new requests while a burst
+            -- is active.
             if csr_read_burst_active = '1' then
                 csr_read_addr_reg    <= std_logic_vector(csr_read_burst_addr);
                 csr_read_respond     <= '1';
@@ -1370,7 +1415,7 @@ begin
                                 csr_v.queue_active             := '1';
                                 csr_v.queue_header             := '1';
                                 csr_v.queue_word_index         := 0;
-                                csr_pack.launch_page_data      <= csr_pack.page_data;
+                                launch_copy_pending            <= '1';
                             end if;
                         end if;
 
@@ -1436,114 +1481,145 @@ begin
         end if;
     end process csr_reg;
 
-    -- csr_rd is the pure CSR readback mux. It owns no state.
-    csr_rd : process (all)
-        variable csr_v_addr                : natural;
-        variable csr_v_data                : word_t;
-        variable csr_v_status              : word_t;
-        variable csr_v_prog_status         : word_t;
+    -- csr_rd_banks is the pure CSR readback bank decoder. It owns no state.
+    -- Each bank evaluates a narrow range of the CSR address space and outputs
+    -- zero outside its range, so stage 2 can compute csr_read_data as a simple
+    -- 3-way OR of the flopped bank words. See the Slow-85C setup closure note
+    -- in the signal-declaration section above.
+    csr_rd_banks : process (all)
+        variable addr              : natural;
+        variable data_ctrl_v       : word_t;
+        variable data_page_v       : word_t;
+        variable data_boot_v       : word_t;
+        variable status_v          : word_t;
+        variable prog_status_v     : word_t;
     begin
-        csr_v_addr                := to_integer(unsigned(csr_read_addr_reg));
-        csr_v_data                := (others => '0');
-        csr_v_status              := (others => '0');
-        csr_v_prog_status         := (others => '0');
+        addr               := to_integer(unsigned(csr_read_addr_reg));
+        data_ctrl_v        := (others => '0');
+        data_page_v        := (others => '0');
+        data_boot_v        := (others => '0');
 
-        csr_v_status(0)           := csr_ready;
-        csr_v_status(1)           := csr.busy;
-        csr_v_status(2)           := csr_fault;
-        csr_v_status(3)           := csr.resetting;
+        status_v           := (others => '0');
+        status_v(0)        := csr_ready;
+        status_v(1)        := csr.busy;
+        status_v(2)        := csr_fault;
+        status_v(3)        := csr.resetting;
 
-        csr_v_prog_status(0)               := csr_ready;
-        csr_v_prog_status(1)               := csr.busy;
-        csr_v_prog_status(2)               := csr_page_ready;
-        csr_v_prog_status(3)               := csr.flash_addr_valid;
-        csr_v_prog_status(4)               := csr_len_valid;
-        csr_v_prog_status(5)               := csr.busy;
-        csr_v_prog_status(6)               := csr.launch_accepted;
-        csr_v_prog_status(7)               := csr.launch_done;
-        csr_v_prog_status(8)               := csr.max10_stat(MAX10_STATUS_BIT_ARRIAWRITING_CONST);
-        csr_v_prog_status(9)               := csr.max10_stat(MAX10_STATUS_BIT_SPI_BUSY_CONST);
-        csr_v_prog_status(10)              := csr.max10_stat(MAX10_STATUS_BIT_FIFO_EMPTY_CONST);
-        csr_v_prog_status(11)              := csr.max10_stat(MAX10_STATUS_BIT_FIFO_FULL_CONST);
-        csr_v_prog_status(12)              := csr.max10_stat(MAX10_STATUS_BIT_CONF_DONE_CONST);
-        csr_v_prog_status(13)              := csr.max10_stat(MAX10_STATUS_BIT_NSTATUS_CONST);
-        csr_v_prog_status(14)              := csr.max10_stat(MAX10_STATUS_BIT_TIMEOUT_CONST);
-        csr_v_prog_status(15)              := csr.max10_stat(MAX10_STATUS_BIT_CRCERROR_CONST);
-        csr_v_prog_status(23 downto 16)    := csr_state_slv;
+        prog_status_v                := (others => '0');
+        prog_status_v(0)             := csr_ready;
+        prog_status_v(1)             := csr.busy;
+        prog_status_v(2)             := csr_page_ready;
+        prog_status_v(3)             := csr.flash_addr_valid;
+        prog_status_v(4)             := csr_len_valid;
+        prog_status_v(5)             := csr.busy;
+        prog_status_v(6)             := csr.launch_accepted;
+        prog_status_v(7)             := csr.launch_done;
+        prog_status_v(8)             := csr.max10_stat(MAX10_STATUS_BIT_ARRIAWRITING_CONST);
+        prog_status_v(9)             := csr.max10_stat(MAX10_STATUS_BIT_SPI_BUSY_CONST);
+        prog_status_v(10)            := csr.max10_stat(MAX10_STATUS_BIT_FIFO_EMPTY_CONST);
+        prog_status_v(11)            := csr.max10_stat(MAX10_STATUS_BIT_FIFO_FULL_CONST);
+        prog_status_v(12)            := csr.max10_stat(MAX10_STATUS_BIT_CONF_DONE_CONST);
+        prog_status_v(13)            := csr.max10_stat(MAX10_STATUS_BIT_NSTATUS_CONST);
+        prog_status_v(14)            := csr.max10_stat(MAX10_STATUS_BIT_TIMEOUT_CONST);
+        prog_status_v(15)            := csr.max10_stat(MAX10_STATUS_BIT_CRCERROR_CONST);
+        prog_status_v(23 downto 16)  := csr_state_slv;
 
-        case csr_v_addr is
+        -- Bank 0 — identity, control, status, error, flash, xfer, max10,
+        -- last_error. Range 0x000..0x00E. Narrow 15-way mux; zero outside.
+        case addr is
             when REG_ID_CONST =>
-                csr_v_data                  := IP_ID_CONST;
-
+                data_ctrl_v                 := IP_ID_CONST;
             when REG_VERSION_CONST =>
-                csr_v_data                  := pack_version_func(VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, BUILD);
-
+                data_ctrl_v                 := pack_version_func(VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH, BUILD);
             when REG_CTRL_CONST =>
-                csr_v_data(0)               := csr.resetting;
-
+                data_ctrl_v(0)              := csr.resetting;
             when REG_STATUS_CONST =>
-                csr_v_data                  := csr_v_status;
-
+                data_ctrl_v                 := status_v;
             when REG_ERR_FLAGS_CONST =>
-                csr_v_data                  := csr.err_flags;
-
+                data_ctrl_v                 := csr.err_flags;
             when REG_ERR_COUNT_CONST =>
-                csr_v_data                  := std_logic_vector(csr.err_count);
-
+                data_ctrl_v                 := std_logic_vector(csr.err_count);
             when REG_SCRATCH_CONST =>
-                csr_v_data                  := csr.scratch;
-
+                data_ctrl_v                 := csr.scratch;
             when REG_FLASH_ADDR_CONST =>
-                csr_v_data(23 downto 0)     := csr.flash_addr;
-
+                data_ctrl_v(23 downto 0)    := csr.flash_addr;
             when REG_XFER_BYTES_CONST =>
-                csr_v_data(8 downto 0)      := std_logic_vector(csr.xfer_bytes);
-
+                data_ctrl_v(8 downto 0)     := std_logic_vector(csr.xfer_bytes);
             when REG_PROG_CTRL_CONST =>
-                csr_v_data                  := (others => '0');
-
+                data_ctrl_v                 := (others => '0');
             when REG_PROG_STATUS_CONST =>
-                csr_v_data                  := csr_v_prog_status;
-
+                data_ctrl_v                 := prog_status_v;
             when REG_STAGED_WORDS_CONST =>
-                csr_v_data(6 downto 0)      := std_logic_vector(to_unsigned(csr_staged_words, 7));
-
+                data_ctrl_v(6 downto 0)     := std_logic_vector(to_unsigned(csr_staged_words, 7));
             when REG_MAX10_STAT_CONST =>
-                csr_v_data                  := csr.max10_stat;
-
+                data_ctrl_v                 := csr.max10_stat;
             when REG_MAX10_COUNT_CONST =>
-                csr_v_data                  := csr.max10_count;
-
+                data_ctrl_v                 := csr.max10_count;
             when REG_LAST_ERROR_CONST =>
-                csr_v_data                  := csr.last_error;
-
-            when REG_PAGE_DATA_BASE_CONST to REG_PAGE_DATA_LAST_CONST =>
-                csr_v_data                  := csr_pack.page_data(csr_v_addr - REG_PAGE_DATA_BASE_CONST);
-
-            when REG_BOOT_HIST_CTRL_CONST =>
-                csr_v_data(0)               := csr.boot_refresh_busy;
-                csr_v_data(1)               := csr.boot_auto_refresh_armed;
-
-            when REG_BOOT_LIVE_INFO_CONST =>
-                csr_v_data                  := csr.boot_live_info;
-
-            when REG_BOOT_EVT0_BASE_CONST to REG_BOOT_EVT0_LAST_CONST =>
-                csr_v_data                  := csr.boot_evt0_words(csr_v_addr - REG_BOOT_EVT0_BASE_CONST);
-
-            when REG_BOOT_EVT1_BASE_CONST to REG_BOOT_EVT1_LAST_CONST =>
-                csr_v_data                  := csr.boot_evt1_words(csr_v_addr - REG_BOOT_EVT1_BASE_CONST);
-
-            when REG_BOOT_PERSIST_INFO_CONST =>
-                csr_v_data                  := csr.boot_persist_info;
-
-            when REG_BOOT_PERSIST_BASE_CONST to REG_BOOT_PERSIST_LAST_CONST =>
-                csr_v_data                  := csr.boot_persist_words(csr_v_addr - REG_BOOT_PERSIST_BASE_CONST);
-
+                data_ctrl_v                 := csr.last_error;
             when others =>
-                csr_v_data                  := (others => '0');
+                data_ctrl_v                 := (others => '0');
         end case;
 
-        csr_readdata_comb                   <= csr_v_data;
-    end process csr_rd;
+        -- Bank 1 — page_data (64-entry indexed mux). Range 0x020..0x05F.
+        if (addr >= REG_PAGE_DATA_BASE_CONST) and (addr <= REG_PAGE_DATA_LAST_CONST) then
+            data_page_v                     := csr_pack.page_data(addr - REG_PAGE_DATA_BASE_CONST);
+        end if;
+
+        -- Bank 2 — boot-history control, live info, evt0/evt1/persist words.
+        -- Range 0x060..0x074. Narrow mux; zero outside.
+        case addr is
+            when REG_BOOT_HIST_CTRL_CONST =>
+                data_boot_v(0)              := csr.boot_refresh_busy;
+                data_boot_v(1)              := csr.boot_auto_refresh_armed;
+            when REG_BOOT_LIVE_INFO_CONST =>
+                data_boot_v                 := csr.boot_live_info;
+            when REG_BOOT_EVT0_BASE_CONST to REG_BOOT_EVT0_LAST_CONST =>
+                data_boot_v                 := csr.boot_evt0_words(addr - REG_BOOT_EVT0_BASE_CONST);
+            when REG_BOOT_EVT1_BASE_CONST to REG_BOOT_EVT1_LAST_CONST =>
+                data_boot_v                 := csr.boot_evt1_words(addr - REG_BOOT_EVT1_BASE_CONST);
+            when REG_BOOT_PERSIST_INFO_CONST =>
+                data_boot_v                 := csr.boot_persist_info;
+            when REG_BOOT_PERSIST_BASE_CONST to REG_BOOT_PERSIST_LAST_CONST =>
+                data_boot_v                 := csr.boot_persist_words(addr - REG_BOOT_PERSIST_BASE_CONST);
+            when others =>
+                data_boot_v                 := (others => '0');
+        end case;
+
+        csr_bank_ctrl_comb                  <= data_ctrl_v;
+        csr_bank_page_comb                  <= data_page_v;
+        csr_bank_boot_comb                  <= data_boot_v;
+    end process csr_rd_banks;
+
+    -- csr_rd_pipe owns the two CSR-readback flop stages: stage 1.5 captures
+    -- the three narrow bank decodes, stage 2 OR-reduces them into
+    -- csr_read_data and asserts csr_read_valid. Decoupled from csr_reg so the
+    -- readback data path does not share an sclr cone with the programming FSM.
+    csr_rd_pipe : process (csi_csr_clk, rsi_csr_reset)
+    begin
+        if rsi_csr_reset = '1' then
+            csr_bank_ctrl_r               <= (others => '0');
+            csr_bank_page_r               <= (others => '0');
+            csr_bank_boot_r               <= (others => '0');
+            csr_read_respond_r             <= '0';
+            csr_read_data                   <= (others => '0');
+            csr_read_valid                  <= '0';
+        elsif rising_edge(csi_csr_clk) then
+            -- Stage 1.5 — flop the three narrow bank decode outputs and the
+            -- delayed respond flag. The stage-1 addr flop in csr_reg is the
+            -- sole arrival driver into this cone.
+            csr_bank_ctrl_r               <= csr_bank_ctrl_comb;
+            csr_bank_page_r               <= csr_bank_page_comb;
+            csr_bank_boot_r               <= csr_bank_boot_comb;
+            csr_read_respond_r             <= csr_read_respond;
+
+            -- Stage 2 — shallow OR-reduce. Each bank output was zero outside
+            -- its range, so a straight OR is sufficient; no hit-bit masking.
+            csr_read_data                   <= csr_bank_ctrl_r
+                                            or csr_bank_page_r
+                                            or csr_bank_boot_r;
+            csr_read_valid                  <= csr_read_respond_r;
+        end if;
+    end process csr_rd_pipe;
 
 end architecture rtl;

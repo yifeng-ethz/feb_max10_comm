@@ -1,0 +1,3 @@
+QUARTUS_VERSION = "18.1"
+
+PROJECT_REVISION = "max10_prog_avmm_minimal"

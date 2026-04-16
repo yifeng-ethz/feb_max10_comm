@@ -1,0 +1,30 @@
+set_global_assignment -name FAMILY "Arria V"
+set_global_assignment -name DEVICE 5AGXBA7D4F31C5
+set_global_assignment -name TOP_LEVEL_ENTITY max10_prog_avmm
+set_global_assignment -name ORIGINAL_QUARTUS_VERSION 18.1.0
+set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
+set_global_assignment -name VHDL_INPUT_VERSION VHDL_2008
+set_global_assignment -name NUM_PARALLEL_PROCESSORS 4
+
+# Align standalone sign-off preset with the FEB top-level build
+# (online_dpv2/online/common/firmware/util/quartus/settings.tcl) so a
+# standalone close is a reliable indicator of FEB close.
+set_global_assignment -name SAFE_STATE_MACHINE ON
+set_global_assignment -name OPTIMIZATION_MODE "HIGH PERFORMANCE EFFORT"
+set_global_assignment -name FITTER_EFFORT "STANDARD FIT"
+set_global_assignment -name OPTIMIZE_MULTI_CORNER_TIMING ON
+set_global_assignment -name ADVANCED_PHYSICAL_OPTIMIZATION ON
+set_global_assignment -name SAVE_DISK_SPACE OFF
+set_global_assignment -name AUTO_RESOURCE_SHARING OFF
+
+# Cross-repo package dependencies from online_dpv2 (work.mudaq -> work.util_slv).
+set_global_assignment -name VHDL_FILE /home/yifeng/packages/online_dpv2/online/common/firmware/util/util_slv.vhd
+set_global_assignment -name VHDL_FILE /home/yifeng/packages/online_dpv2/online/common/firmware/registers/mudaq.vhd
+
+# Local IP sources.
+set_global_assignment -name VHDL_FILE ../../rtl/max10_spi_split.vhd
+set_global_assignment -name VHDL_FILE ../../rtl/max10_prog_avmm.vhd
+
+set_global_assignment -name SDC_FILE max10_prog_avmm_minimal.sdc
+
+set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Standard Edition"
