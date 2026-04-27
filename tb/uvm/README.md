@@ -58,13 +58,14 @@ License/runtime note:
 
 - The runner follows the `online_sc` workspace guidance in
   `/home/yifeng/packages/online_sc/workspace_tooling.md`.
-- For UVM it uses the Pro Questa chain:
-  - `LM_LICENSE_FILE=/data1/intelFPGA_pro/23.1/questa_fse/LR-287689_License.dat:8161@lic-mentor.ethz.ch`
-  - `TB_SIM_FLAVOR=mentor`
-  - `TB_UVM_SRC_DIR=/data1/intelFPGA_pro/23.1/questa_fse/verilog_src/uvm-1.2/src`
-- `run_uvm_feb_max10_comm.sh` now auto-sanitizes the stale Quartus 18.1 license
-  path `/data1/intelFPGA/LR-121070_License.dat` and mirrors the corrected chain
-  into `MGLS_LICENSE_FILE`.
+- `run_uvm_feb_max10_comm.sh` sources `../../scripts/questa_one_env.sh`, so the
+  supported simulator is the shared QuestaOne 2026 install at
+  `/data1/questaone_sim/questasim`.
+- `TB_UVM_SRC_DIR` defaults to `${QUESTA_UVM_HOME}/src`, which resolves to the
+  bundled UVM 1.2 source tree from the shared wrapper.
+- License variables come from the shared wrapper and point at the ETH floating
+  server chain; the older Quartus 18.1 fixed-node path is no longer part of the
+  supported runtime.
 
 Simulation note:
 

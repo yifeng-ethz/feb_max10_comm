@@ -15,6 +15,7 @@ ip_dir="$(cd "${script_dir}/../.." && pwd)"
 common_tb_dir="${ip_dir}/tb/common"
 legacy_sim_dir="${ip_dir}/legacy/max10_prog_avmm/tb/sim"
 work_dir="${TB_WORK_DIR:-${script_dir}/${work_name}}"
+source "${ip_dir}/../scripts/questa_one_env.sh"
 
 tb_top="feb_max10_comm_case_tb"
 
@@ -22,42 +23,10 @@ online_dpv2_root="${ONLINE_DPV2_ROOT:-/home/yifeng/packages/online_dpv2}"
 run_synth_parity_checks="${RUN_SYNTH_PARITY_CHECKS:-1}"
 synth_parity_skip_regenerate="${SYNTH_PARITY_SKIP_REGENERATE:-0}"
 
-mentor_sim_bin_dir="/data1/intelFPGA_pro/23.1/questa_fse/bin"
-ase_sim_root="/data1/intelFPGA/18.1/modelsim_ase"
-ase_sim_bin_dir="${ase_sim_root}/linuxaloem"
-if [ ! -x "${ase_sim_bin_dir}/vsim" ]; then
-    ase_sim_bin_dir="${ase_sim_root}/bin"
-fi
-
-sim_flavor="${TB_SIM_FLAVOR:-auto}"
-sim_bin_dir=""
-case "${sim_flavor}" in
-    mentor) sim_bin_dir="${mentor_sim_bin_dir}" ;;
-    ase)    sim_bin_dir="${ase_sim_bin_dir}" ;;
-    auto)
-        if [ -x "${ase_sim_bin_dir}/vsim" ]; then
-            sim_bin_dir="${ase_sim_bin_dir}"
-        elif [ -x "${mentor_sim_bin_dir}/vsim" ]; then
-            sim_bin_dir="${mentor_sim_bin_dir}"
-        else
-            sim_bin_dir="$(dirname "$(command -v vsim)")"
-        fi
-        ;;
-    *)
-        echo "ERROR: unknown TB_SIM_FLAVOR='${sim_flavor}' (use: auto|mentor|ase)" >&2
-        exit 2
-        ;;
-esac
-
-vlib_cmd="${sim_bin_dir}/vlib"
-vmap_cmd="${sim_bin_dir}/vmap"
-vcom_cmd="${sim_bin_dir}/vcom"
-vsim_cmd="${sim_bin_dir}/vsim"
-
-if [ ! -x "${vsim_cmd}" ]; then
-    echo "ERROR: vsim not found under '${sim_bin_dir}'" >&2
-    exit 2
-fi
+vlib_cmd="${VLIB}"
+vmap_cmd="${VMAP}"
+vcom_cmd="${VCOM}"
+vsim_cmd="${VSIM}"
 
 if [ "${run_synth_parity_checks}" != "0" ]; then
     synth_parity_args=()
@@ -68,18 +37,6 @@ if [ "${run_synth_parity_checks}" != "0" ]; then
         --ip-root "${ip_dir}" \
         --online-root "${online_dpv2_root}/online" \
         "${synth_parity_args[@]}"
-fi
-
-questa_home="$(cd "${sim_bin_dir}/.." && pwd)"
-default_local_lic="${questa_home}/LR-287689_License.dat"
-default_chain="${default_local_lic}:8161@lic-mentor.ethz.ch"
-
-lmutil_cmd="${questa_home}/linux_x86_64/lmutil"
-if [ -x "${lmutil_cmd}" ] && [ -f "${default_local_lic}" ]; then
-    diag_out="$("${lmutil_cmd}" lmdiag -n intelqsimstarter 2>&1 || true)"
-    if ! printf '%s\n' "${diag_out}" | rg -q "This license can be checked out|This is the correct node for this node-locked license"; then
-        export LM_LICENSE_FILE="${default_chain}"
-    fi
 fi
 
 rm -rf -- "${work_dir}"

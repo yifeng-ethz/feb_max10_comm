@@ -38,13 +38,15 @@ Author: Codex
   - No `DV_PLAN.md` file is present in this IP tree. Existing verification evidence was taken from the checked-in regression outputs and README status.
 - Evidence:
   - `tb/sim`: all `8` deterministic `SIM_*` cases are marked passing in [README.md](/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/README.md)
-  - Representative logs exist under:
-    - [vsim.log](/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/tb/sim/work_sim_001_reset_defaults/vsim.log)
-    - [vsim.log](/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/tb/sim/work_sim_008_fault_injection/vsim.log)
+  - Historical representative sim logs were captured under
+    `tb/sim/work_sim_001_reset_defaults/vsim.log` and
+    `tb/sim/work_sim_008_fault_injection/vsim.log`, but those transient logs
+    are not checked in.
   - `tb/uvm`: all `128` runnable `UVM_*` cases are marked passing in [README.md](/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/README.md)
-  - Representative regression logs exist under:
-    - [UVM_001_RESET_DEFAULTS.log](/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/tb/uvm/regression_logs_20260316/UVM_001_RESET_DEFAULTS.log)
-    - [UVM_128_RANDOM_15.log](/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/tb/uvm/regression_logs_20260316_rerun/UVM_128_RANDOM_15.log)
+  - Historical representative UVM logs were captured under
+    `tb/uvm/regression_logs_20260316/` and
+    `tb/uvm/regression_logs_20260316_rerun/`, but those log directories are
+    not checked in.
   - Qsys/package parity:
     - parity regeneration script passed earlier in the 2026-03-16 closure
     - source script: [check_synthesis_parity.py](/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/tb/uvm/check_synthesis_parity.py)
@@ -92,7 +94,9 @@ Author: Codex
 | DSP blocks | N/A | `0` | N/A | N/A | From standalone fitter summary |
 
 Resource evidence:
-- [feb_max10_comm_syn.fit.summary](/home/yifeng/packages/mu3e_ip_dev/mu3e-ip-cores/feb_max10_comm/syn/quartus/output_files/feb_max10_comm_syn.fit.summary)
+- Historical fitter evidence came from
+  `syn/quartus/output_files/feb_max10_comm_syn.fit.summary`, which is not
+  checked in with this note.
 
 ## 5. Gate-level simulation sign-off
 
@@ -122,7 +126,8 @@ Resource evidence:
 
 - Qsys regeneration succeeded on 2026-03-16 for:
   - [debug_sc_system_generation.rpt](/home/yifeng/packages/online_dpv2/online/fe_board/fe_scifi/debug_sc_system/debug_sc_system_generation.rpt)
-  - [feb_system_generation.rpt](/home/yifeng/packages/online_dpv2/online/fe_board/fe_scifi/feb_system/feb_system_generation.rpt)
+  - historical `feb_system_generation.rpt` under the deprecated
+    `online_dpv2` FEB tree (not checked in here)
 - Both systems instantiate `max10_prog_avmm_0` as `feb_max10_comm`.
 - Full FEB top synthesis with SignalTap disabled succeeded on 2026-03-16 after regeneration.
 - Full FEB fitter and STA also succeeded to completion on the regenerated board project using the same integration path:
