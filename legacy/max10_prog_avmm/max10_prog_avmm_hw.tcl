@@ -2,7 +2,7 @@ package require -exact qsys 16.1
 
 set_module_property NAME max10_prog_avmm
 set_module_property DISPLAY_NAME "MAX10 Programming AVMM Bridge"
-set_module_property VERSION 0.2.0
+set_module_property VERSION 26.0.0.0518
 set_module_property DESCRIPTION "Arria-side AVMM CSR bridge for MAX10 flash programming. Stages one 256-byte page, supports sequential CSR read bursts, crosses into the MAX10 link domain through a dual-clock FIFO, and preserves the existing downstream FEBSPI programming contract."
 set_module_property GROUP "Mu3e Control Plane/Modules"
 set_module_property AUTHOR "Yifeng Wang"
